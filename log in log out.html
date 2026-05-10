@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TON-TON Putok Batok | Management System</title>
+    <style>
+        :root {
+            --primary: #27ae60;
+            --accent-red: #fb0d0d;
+            --glass: rgba(255, 255, 255, 0.9);
+            --dark-glass: rgba(0, 0, 0, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background: linear-gradient(rgba(233, 77, 77, 0.6), rgba(241, 6, 6, 0.6)), 
+                        url('https://tse2.mm.bing.net/th/id/OIP.T4vaa0BR8pSgcJ4xW-G_KgHaHa?pid=Api&P=0&h=180');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-glass);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+        }
+
+        .login-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 350px;
+        }
+
+        /* DYNAMIC LOGO STYLES */
+        .logo-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .logo-display {
+            width: 100%;
+            height: 100%;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            border: 4px solid #f1f1f1;
+            object-fit: cover;
+            overflow: hidden;
+        }
+
+        .logo-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-hint {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            border: 2px solid white;
+        }
+
+        
+        #main-wrapper {
+            display: none;
+            min-height: 100vh;
+        }
+
+        nav {
+            width: 280px;
+            background: var(--dark-glass);
+            backdrop-filter: blur(15px);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(5px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        /* --- UI COMPONENTS --- */
+        h2, h3 { margin-top: 0; color: var(--accent-red); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        th { background-color: #f8f9fa; color: #666; text-transform: uppercase; font-size: 0.8rem; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn:hover { background: #219150; transform: translateY(-2px); }
+
+        .btn-logout {
+            background: #333;
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-top: auto;
+        }
+
+        input {
+            padding: 12px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            outline-color: var(--accent-red);
+        }
+
+        .hidden { display: none !important; }
+
+        .status-badge {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HIDDEN FILE INPUT -->
+<input type="file" id="logoInput" accept="image/*" class="hidden" onchange="previewLogo(this)">
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+    <div class="login-card">
+        <!-- CLICKABLE LOGO TO CHANGE -->
+        <div class="logo-container" onclick="document.getElementById('logoInput').click()">
+            <div class="logo-display" id="loginLogo">TT</div>
+            <div class="upload-hint">+</div>
+        </div>
+        
+        <h1 style="color: var(--accent-red); margin: 0;">TON-TON</h1>
+        <p style="color: #666; margin-bottom: 25px; font-weight: 500;">Putok Batok Eatery</p>
+        
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button class="btn" style="width: 100%; margin-top: 15px;" onclick="handleLogin()">Sign In</button>
+    </div>
+</div>
+
+<!-- MAIN DASHBOARD -->
+<div id="main-wrapper">
+    <nav>
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="logo-container" style="width: 70px; height: 70px;" onclick="document.getElementById('logoInput').click()">
+                <div class="logo-display" id="navLogo" style="font-size: 1.8rem;">TT</div>
+            </div>
+            <h3 style="color: white; margin: 0;">TON-TON Admin</h3>
+            <p id="user-display" style="color: var(--primary); font-size: 0.9rem; margin-top: 5px;"></p>
+        </div>
+
+        <ul style="list-style: none; padding: 0; flex-grow: 1;">
+            <li style="padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">📦 Inventory Control</li>
+            <li style="padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">📋 Order List</li>
+            <li style="padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;">📈 Sales Report</li>
+        </ul>
+        
+        <button class="btn btn-logout" onclick="handleLogout()">Log Out</button>
+    </nav>
+
+    <div class="main-content">
+        <h2 style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Dashboard Overview</h2>
+        
+        <div class="card">
+            <h3>Add New Eatery Item</h3>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <input type="text" id="pName" placeholder="Item Name (e.g. Bulalo)">
+                <input type="number" id="pQty" placeholder="Qty">
+                <input type="number" id="pPrice" placeholder="Price (₱)">
+                <button class="btn" onclick="addItem()" style="min-width: 180px;">Add to Menu</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Live Menu & Stock Levels</h3>
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th>Available Qty</th>
+                        <th>Unit Price</th>
+                        <th>Stock Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Crispy Pata</td>
+                        <td>12</td>
+                        <td>₱450.00</td>
+                        <td><span class="status-badge">In Stock</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        // Load saved logo if exists
+        const savedLogo = localStorage.getItem('eateryLogo');
+        if (savedLogo) {
+            updateAllLogos(savedLogo);
+        }
+
+        const loggedInUser = localStorage.getItem('currentUser');
+        if (loggedInUser) {
+            showDashboard(loggedInUser);
+        }
+    };
+
+    // --- LOGO CHANGE LOGIC ---
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const imgData = e.target.result;
+                updateAllLogos(imgData);
+                // Save to localStorage
+                localStorage.setItem('eateryLogo', imgData);
+            };
+            
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updateAllLogos(src) {
+        const loginLogo = document.getElementById('loginLogo');
+        const navLogo = document.getElementById('navLogo');
+        
+        const imgHTML = `<img src="${src}" alt="Logo">`;
+        loginLogo.innerHTML = imgHTML;
+        navLogo.innerHTML = imgHTML;
+    }
+
+    // --- AUTHENTICATION LOGIC ---
+    function handleLogin() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if (user.trim() !== "" && pass !== "") {
+            localStorage.setItem('currentUser', user);
+            showDashboard(user);
+        } else {
+            alert("Please check your credentials!");
+        }
+    }
+
+    function handleLogout() {
+        localStorage.removeItem('currentUser');
+        location.reload();
+    }
+
+    function showDashboard(username) {
+        document.getElementById('login-overlay').classList.add('hidden');
+        document.getElementById('main-wrapper').style.display = 'flex';
+        document.getElementById('user-display').innerText = "Logged in as: " + username;
+    }
+
+    function addItem() {
+        const name = document.getElementById('pName').value;
+        const qty = document.getElementById('pQty').value;
+        const price = document.getElementById('pPrice').value;
+
+        if(name && qty && price) {
+            const table = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td style="font-weight: 600;">${name}</td>
+                <td>${qty}</td>
+                <td>₱${parseFloat(price).toFixed(2)}</td>
+                <td><span class="status-badge">In Stock</span></td>
+            `;
+            
+            document.getElementById('pName').value = '';
+            document.getElementById('pQty').value = '';
+            document.getElementById('pPrice').value = '';
+        } else {
+            alert("Input details are missing!");
+        }
+    }
+</script>
+
+</body>
+</html>
